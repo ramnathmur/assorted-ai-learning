@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The Iceberg of Machine Intelligence — How an LLM Is More Than a Next-Word Guesser</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --ink:#1a1814; --ink2:#3d3a34; --ink3:#7a7670;
+  --cream:#faf7f2; --cream2:#f2ede4; --cream3:#e8e1d4;
+  --amber:#c8832a; --amber-light:#f5e6cc; --amber-dark:#8a5a1a;
+  --teal:#2a7a6e; --teal-light:#d4f0ec;
+  --coral:#c85a3a; --coral-light:#fae8e2;
+  --purple:#5a3a8a; --purple-light:#ece6f5;
+  --green:#3a7a4a; --green-light:#e2f0e6;
+  --blue:#2a5a8a; --blue-light:#ddeaf5;
+  --gray-light:#f0ece6; --border:#ddd8ce;
+  --shadow:0 2px 16px rgba(26,24,20,0.08); --shadow-lg:0 8px 40px rgba(26,24,20,0.12);
+  --radius:12px; --radius-sm:8px;
+  --serif:'DM Serif Display',Georgia,'Times New Roman',serif;
+  --sans:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--sans);background:var(--cream);color:var(--ink);font-size:16px;line-height:1.7;}
+
+/* HERO */
+.hero{background:var(--ink);color:var(--cream);padding:72px 40px 60px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 70% at 50% 110%,rgba(42,90,138,0.30) 0%,transparent 70%),radial-gradient(ellipse 70% 50% at 50% -10%,rgba(200,131,42,0.16) 0%,transparent 70%);pointer-events:none;}
+.hero-inner{position:relative;z-index:1;}
+.hero-eyebrow{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--amber);margin-bottom:20px;}
+.hero h1{font-family:var(--serif);font-size:clamp(34px,5vw,56px);font-weight:400;line-height:1.12;margin-bottom:20px;color:#fff;}
+.hero h1 em{font-style:italic;color:var(--amber);}
+.hero-sub{font-size:17px;font-weight:300;color:rgba(250,247,242,0.74);max-width:600px;margin:0 auto 24px;line-height:1.65;}
+.hero-loop{font-family:var(--mono);font-size:13px;letter-spacing:0.1em;color:rgba(250,247,242,0.5);margin-bottom:32px;min-height:22px;}
+.hero-loop .loop-word{opacity:0;display:inline;}
+.hero-loop .loop-word.visible{animation:wordFadeIn 0.4s ease forwards;}
+@keyframes wordFadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+.hero-tags{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.tag{font-size:12px;font-weight:500;letter-spacing:0.06em;padding:5px 14px;border-radius:99px;border:1px solid rgba(250,247,242,0.2);color:rgba(250,247,242,0.7);}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:100;background:rgba(250,247,242,0.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:0 40px;}
+.nav-inner{max-width:980px;margin:0 auto;display:flex;gap:0;overflow-x:auto;align-items:center;}
+.nav-link{font-size:13px;font-weight:500;color:var(--ink3);text-decoration:none;padding:14px 16px;white-space:nowrap;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink);border-color:var(--amber);}
+.nav-progress{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink3);white-space:nowrap;padding:14px 0 14px 18px;border-left:1px solid var(--border);}
+.nav-progress span{color:var(--amber);font-weight:500;}
+
+/* LAYOUT */
+.container{max-width:980px;margin:0 auto;padding:0 40px;}
+.section{padding:72px 0;}
+.section+.section{border-top:1px solid var(--border);}
+.section-label{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:var(--amber);margin-bottom:12px;}
+.section-title{font-family:var(--serif);font-size:clamp(26px,3.5vw,36px);font-weight:400;line-height:1.2;margin-bottom:16px;color:var(--ink);}
+.section-intro{font-size:16px;font-weight:300;color:var(--ink2);max-width:720px;margin-bottom:44px;line-height:1.75;}
+.section-intro strong{font-weight:600;color:var(--ink);}
+em{color:inherit;}
+
+/* DARK CALLOUT */
+.dark-callout{background:var(--ink);color:var(--cream);padding:32px 36px;border-radius:var(--radius);margin-bottom:40px;}
+.dark-callout .kicker{font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--amber);margin-bottom:16px;}
+.dark-callout p{font-size:16px;line-height:1.8;font-weight:300;color:rgba(250,247,242,0.88);}
+.dark-callout p+p{margin-top:14px;}
+.dark-callout strong{color:#fff;font-weight:500;}
+.dark-callout .muted{font-size:14px;color:rgba(250,247,242,0.55);font-style:italic;}
+
+/* SVG CARD */
+.svg-card{background:var(--cream2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:16px;}
+.svg-card svg{width:100%;display:block;height:auto;}
+.dive-node{cursor:pointer;transition:opacity .2s;}
+.dive-node:hover{opacity:0.85;}
+.dive-node.flash rect{filter:drop-shadow(0 0 7px rgba(200,131,42,0.6));}
+@keyframes wave{from{transform:translateX(0);}to{transform:translateX(-40px);}}
+.waveline{animation:wave 6s linear infinite;}
+@keyframes bubbleUp{0%{opacity:0;transform:translateY(0);}30%{opacity:0.7;}100%{opacity:0;transform:translateY(-60px);}}
+.bubble{animation:bubbleUp 5s ease-in infinite;}
+.caption{font-size:13px;color:var(--ink3);font-style:italic;text-align:center;margin-bottom:0;}
+
+/* TWO COOKS */
+.cooks{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:32px;}
+.cook{border:1px solid var(--border);border-radius:var(--radius);padding:26px;background:var(--cream2);}
+.cook.a{border-top:3px solid var(--ink3);}
+.cook.b{border-top:3px solid var(--coral);}
+.cook-tag{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px;}
+.cook h4{font-family:var(--serif);font-size:21px;font-weight:400;margin-bottom:10px;}
+.cook.b h4{color:var(--coral);}
+.cook p{font-size:14px;color:var(--ink2);line-height:1.65;}
+.cook .verdict{margin-top:14px;font-size:13px;font-weight:600;}
+.cook.a .verdict{color:var(--ink3);}
+.cook.b .verdict{color:var(--coral);}
+
+/* NEXT-TOKEN WIDGET */
+.ntw{background:var(--ink);border-radius:var(--radius);padding:30px 32px;color:var(--cream);margin-bottom:16px;}
+.ntw-title{font-family:var(--serif);font-size:22px;color:#fff;margin-bottom:4px;}
+.ntw-sub{font-size:13px;color:rgba(250,247,242,0.55);margin-bottom:24px;line-height:1.6;}
+.ntw-context{font-family:var(--mono);font-size:16px;line-height:1.7;color:rgba(250,247,242,0.92);background:rgba(250,247,242,0.06);border:1px solid rgba(250,247,242,0.12);border-radius:var(--radius-sm);padding:16px 18px;margin-bottom:20px;min-height:58px;}
+.ntw-blank{color:var(--amber);border-bottom:2px dashed var(--amber);padding:0 6px;}
+.ntw-picked{color:#fff;font-weight:500;background:rgba(200,131,42,0.22);border-radius:4px;padding:1px 5px;}
+.ntw-cands{display:flex;flex-direction:column;gap:8px;margin-bottom:22px;}
+.ntw-cand{display:flex;align-items:center;gap:12px;font-size:13px;}
+.ntw-cand-tok{font-family:var(--mono);width:96px;flex-shrink:0;color:rgba(250,247,242,0.85);text-align:right;}
+.ntw-bar-track{flex:1;height:18px;background:rgba(250,247,242,0.08);border-radius:99px;overflow:hidden;}
+.ntw-bar-fill{height:18px;border-radius:99px;background:linear-gradient(to right,#2a5a8a,#c8832a);width:0;transition:width .6s cubic-bezier(.34,1.56,.64,1);}
+.ntw-cand.top .ntw-bar-fill{background:linear-gradient(to right,#c8832a,#e0a850);}
+.ntw-cand-p{font-family:var(--mono);font-size:12px;color:rgba(250,247,242,0.5);width:46px;flex-shrink:0;}
+.ntw-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.btn{font-family:var(--sans);font-size:13px;font-weight:600;padding:9px 20px;border-radius:99px;border:1.5px solid var(--amber);background:var(--amber);color:#fff;cursor:pointer;transition:all .15s;letter-spacing:0.02em;}
+.btn:hover{background:var(--amber-dark);border-color:var(--amber-dark);}
+.btn.ghost{background:transparent;color:rgba(250,247,242,0.7);border-color:rgba(250,247,242,0.25);}
+.btn.ghost:hover{color:#fff;border-color:rgba(250,247,242,0.6);background:rgba(250,247,242,0.06);}
+.ntw-note{font-size:13px;color:rgba(250,247,242,0.6);font-style:italic;margin-top:18px;line-height:1.6;min-height:20px;}
+.ntw-note strong{color:var(--amber);font-style:normal;font-weight:600;}
+
+/* STEP FLOW (how it forms) */
+.flow{display:flex;flex-direction:column;gap:0;margin-bottom:32px;}
+.flow-step{display:flex;gap:20px;align-items:flex-start;padding:20px 0;}
+.flow-step+.flow-step{border-top:1px dashed var(--border);}
+.flow-num{font-family:var(--serif);font-size:30px;color:var(--amber);flex-shrink:0;width:48px;line-height:1;}
+.flow-body h4{font-family:var(--sans);font-size:16px;font-weight:600;margin-bottom:4px;color:var(--ink);}
+.flow-body p{font-size:14px;color:var(--ink2);line-height:1.65;}
+.flow-punch{background:var(--amber-light);border:1px solid #e8d0a0;border-radius:var(--radius);padding:22px 26px;font-family:var(--serif);font-size:19px;line-height:1.5;color:var(--amber-dark);text-align:center;}
+
+/* LAYER CARDS */
+.layers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:20px;margin-bottom:24px;}
+.layer-card{background:var(--cream2);border:1px solid var(--border);border-left:3px solid var(--ink3);border-radius:var(--radius);padding:26px;transition:box-shadow .2s,transform .2s;}
+.layer-card:hover{box-shadow:var(--shadow);transform:translateY(-2px);}
+.layer-head{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+.layer-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.layer-depth{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.1em;color:var(--ink3);}
+.layer-name{font-family:var(--serif);font-size:20px;font-weight:400;color:var(--ink);}
+.layer-def{font-size:14px;color:var(--ink2);line-height:1.65;margin-bottom:16px;}
+.layer-rows{display:flex;flex-direction:column;gap:10px;}
+.lrow{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.55;}
+.lrow-label{font-weight:600;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;padding:2px 8px;border-radius:4px;flex-shrink:0;margin-top:2px;min-width:74px;text-align:center;}
+.lab-cook{background:var(--amber-light);color:var(--amber-dark);}
+.lab-force{background:var(--purple-light);color:var(--purple);}
+.lab-see{background:var(--green-light);color:var(--green);}
+.lrow-text{color:var(--ink2);}
+.l-blue{border-left-color:var(--blue);} .l-blue .layer-icon{background:var(--blue-light);}
+.l-teal{border-left-color:var(--teal);} .l-teal .layer-icon{background:var(--teal-light);}
+.l-amber{border-left-color:var(--amber);} .l-amber .layer-icon{background:var(--amber-light);}
+.l-purple{border-left-color:var(--purple);} .l-purple .layer-icon{background:var(--purple-light);}
+.l-coral{border-left-color:var(--coral);} .l-coral .layer-icon{background:var(--coral-light);}
+.l-ink{border-left-color:var(--ink3);} .l-ink .layer-icon{background:var(--gray-light);}
+
+/* SPECTRUM */
+.spectrum-wrap{background:var(--cream2);border:1px solid var(--border);border-radius:var(--radius);padding:40px 36px;margin-bottom:24px;}
+.spectrum-bar{position:relative;height:12px;border-radius:99px;background:linear-gradient(to right,#7a7670 0%,#2a7a6e 50%,#c85a3a 100%);margin:14px 0 8px;}
+.spectrum-marker{position:absolute;top:-7px;width:4px;height:26px;border-radius:3px;background:var(--ink);left:0;transition:left .5s cubic-bezier(.34,1.56,.64,1);box-shadow:0 0 0 3px var(--cream2);}
+.spectrum-labels{display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:32px;}
+.spectrum-labels span:first-child{color:var(--ink3);}
+.spectrum-labels span:nth-child(2){color:var(--teal);}
+.spectrum-labels span:last-child{color:var(--coral);}
+.spectrum-chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:24px;}
+.spchip{font-size:13px;padding:12px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--cream);cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s;}
+.spchip:hover{transform:translateY(-2px);box-shadow:var(--shadow);}
+.spchip.active{border-color:var(--amber);box-shadow:var(--shadow);}
+.spchip-name{font-weight:600;display:block;margin-bottom:2px;color:var(--ink);}
+.spchip-tag{font-size:11px;color:var(--ink3);}
+.spectrum-detail{padding:20px 22px;background:var(--cream);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;color:var(--ink2);line-height:1.7;font-style:italic;min-height:60px;}
+.spectrum-detail strong{color:var(--ink);font-style:normal;}
+
+/* HALLUCINATION DEMO */
+.halluc{background:var(--cream2);border:1px solid var(--border);border-radius:var(--radius);padding:36px;margin-bottom:24px;}
+.halluc-btns{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px;}
+.hbtn{font-size:13px;font-weight:600;padding:9px 16px;border-radius:99px;border:1.5px solid var(--border);background:var(--cream);color:var(--ink2);cursor:pointer;transition:all .15s;}
+.hbtn:hover{border-color:var(--amber);color:var(--amber-dark);}
+.hbtn.active{background:var(--amber-light);border-color:var(--amber);color:var(--amber-dark);}
+.halluc-panel{border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;}
+.halluc-q{background:var(--ink);color:rgba(250,247,242,0.92);font-family:var(--mono);font-size:14px;padding:16px 20px;line-height:1.5;}
+.halluc-body{padding:22px;}
+.halluc-meters{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;}
+.hmeter{display:flex;align-items:center;gap:12px;font-size:13px;}
+.hmeter-label{width:160px;flex-shrink:0;font-weight:600;color:var(--ink2);}
+.hmeter-val{font-family:var(--mono);font-size:12px;padding:3px 10px;border-radius:99px;}
+.hm-fire{background:var(--amber-light);color:var(--amber-dark);}
+.hm-none{background:var(--coral-light);color:var(--coral);}
+.hm-some{background:var(--green-light);color:var(--green);}
+.halluc-outcome{font-size:14px;line-height:1.7;color:var(--ink2);padding:16px 18px;border-radius:var(--radius-sm);border-left:3px solid var(--amber);background:var(--cream);}
+.halluc-outcome strong{color:var(--ink);}
+.outcome-true{border-left-color:var(--green);}
+.outcome-risk{border-left-color:var(--amber);}
+.outcome-false{border-left-color:var(--coral);}
+
+/* TWO QUESTIONS FEATURE */
+.q-feature{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:8px;}
+.qf-card{background:var(--purple-light);border:1px solid #d8cce8;border-radius:var(--radius);padding:26px;}
+.qf-tag{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--purple);margin-bottom:10px;}
+.qf-q{font-family:var(--serif);font-size:19px;color:var(--ink);line-height:1.35;margin-bottom:12px;}
+.qf-a{font-size:14px;color:var(--ink2);line-height:1.7;}
+.qf-a strong{color:var(--ink);}
+
+/* FAQ */
+.faq-list{display:flex;flex-direction:column;gap:2px;}
+.faq-item{border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;transition:box-shadow .2s;}
+.faq-item:hover{box-shadow:var(--shadow);}
+.faq-q{width:100%;display:flex;align-items:flex-start;gap:14px;padding:20px 22px;background:var(--cream2);border:none;cursor:pointer;text-align:left;font-family:var(--sans);font-size:14px;font-weight:600;color:var(--ink);line-height:1.45;transition:background .15s;}
+.faq-q:hover{background:var(--cream3);}
+.faq-badge{font-family:var(--mono);font-size:10px;font-weight:500;padding:3px 8px;border-radius:4px;flex-shrink:0;margin-top:1px;letter-spacing:0.08em;text-transform:uppercase;}
+.badge-hard{background:var(--coral-light);color:var(--coral);}
+.badge-concept{background:var(--purple-light);color:var(--purple);}
+.badge-contested{background:var(--teal-light);color:var(--teal);}
+.faq-arrow{margin-left:auto;flex-shrink:0;font-size:18px;color:var(--ink3);transition:transform .25s;line-height:1;padding-top:1px;}
+.faq-item.open .faq-arrow{transform:rotate(180deg);}
+.faq-a{display:none;padding:0 22px 22px;background:var(--cream2);font-size:14px;color:var(--ink2);line-height:1.75;border-top:1px solid var(--border);padding-top:18px;}
+.faq-item.open .faq-a{display:block;animation:fadeDown .25s ease;}
+@keyframes fadeDown{from{opacity:0;}to{opacity:1;}}
+.faq-a strong{color:var(--ink);font-weight:600;}
+.faq-a ul{padding-left:20px;margin-top:8px;}
+.faq-a li{margin-bottom:6px;}
+
+/* FOOTER */
+.footer-strip{background:var(--ink);color:rgba(250,247,242,0.55);text-align:center;padding:32px 40px;font-size:13px;line-height:1.6;}
+.footer-strip strong{color:rgba(250,247,242,0.85);}
+
+/* RESPONSIVE */
+@media (max-width:720px){
+  .container{padding:0 20px;}
+  .hero{padding:48px 20px 40px;}
+  .nav{padding:0 16px;}
+  .nav-progress{display:none;}
+  .cooks{grid-template-columns:1fr;}
+  .layers-grid{grid-template-columns:1fr;}
+  .q-feature{grid-template-columns:1fr;}
+  .svg-card{padding:14px;}
+  .hmeter-label{width:120px;}
+  .ntw{padding:22px 18px;}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">AI Literacy · How LLMs Think · v1</div>
+    <h1>The Iceberg of<br/><em>Machine Intelligence</em></h1>
+    <p class="hero-sub">An LLM only ever shows you the tip — the next word. This is a guided dive beneath the waterline: how guessing one word at a time, at vast scale, forces a machine to learn first principles and reasoning — and where that intelligence honestly ends.</p>
+    <div class="hero-loop" id="hero-loop" aria-label="Predict, Compress, Generalize, Reason"></div>
+    <div class="hero-tags">
+      <span class="tag">The Iceberg Model</span>
+      <span class="tag">Cook A vs Cook B</span>
+      <span class="tag">Next-Token Playground</span>
+      <span class="tag">6 Hidden Layers</span>
+      <span class="tag">Why It Hallucinates</span>
+      <span class="tag">Challenge Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-link" href="#paradox">The Paradox</a>
+    <a class="nav-link" href="#iceberg">The Iceberg</a>
+    <a class="nav-link" href="#forms">How It Forms</a>
+    <a class="nav-link" href="#layers">The 6 Layers</a>
+    <a class="nav-link" href="#spectrum">Parrot ↔ Mind</a>
+    <a class="nav-link" href="#hallucinate">Why It Hallucinates</a>
+    <a class="nav-link" href="#questions">The Two Questions</a>
+    <a class="nav-link" href="#faq">Challenge Q&amp;A</a>
+    <div class="nav-progress">Depth: <span id="depth-pct">0</span>%</div>
+  </div>
+</nav>
+
+<!-- SECTION 1 — THE PARADOX -->
+<section class="section" id="paradox">
+  <div class="container">
+    <div class="section-label">Section 01</div>
+    <h2 class="section-title">The Paradox: "It Just Predicts the Next Word"</h2>
+    <p class="section-intro">
+      Everyone has heard it: a large language model is "just" predicting the next word. That is literally true — and it is also why people doubt it could be intelligent. The resolution is the single most important idea on this page: <strong>predicting the next word, at enormous scale, is not a parlour trick — it is a forcing function that compels a machine to learn how the world works.</strong> Prediction is the exam. Understanding is what you must grow in order to pass it.
+    </p>
+
+    <div class="dark-callout">
+      <div class="kicker">The tension in one breath</div>
+      <p>During training, the model is shown text with the last word hidden, guesses it, is scored on the error, and adjusts — billions of times. That objective looks almost insultingly simple. So the honest question is: <strong>where would intelligence even come from?</strong></p>
+      <p class="muted">Answer: the same place a great cook's skill comes from — not from memorising dishes, but from being forced, over thousands of attempts, to internalise the principles underneath them.</p>
+    </div>
+
+    <div class="cooks">
+      <div class="cook a">
+        <div class="cook-tag">The Parrot</div>
+        <h4>Cook A — memorises</h4>
+        <p>Has 10,000 recipes word-for-word. Ask for one of them — flawless. Ask for "a dessert from only what's in my fridge right now" and Cook A freezes: there is no recipe to recall.</p>
+        <div class="verdict">→ Reproduces. Cannot handle the unseen.</div>
+      </div>
+      <div class="cook b">
+        <div class="cook-tag">The Mind</div>
+        <h4>Cook B — understands</h4>
+        <p>Studied the same 10,000 recipes, but stopped memorising and started internalising <em>principles</em>: acid cuts fat, heat transforms, salt amplifies. Hand Cook B an anchovy-chocolate-lime fridge and they invent a coherent dish that exists in no cookbook.</p>
+        <div class="verdict">→ Generalises. Handles what it never saw.</div>
+      </div>
+    </div>
+
+    <p class="section-intro" style="margin-bottom:24px;">
+      Both cooks saw the <em>same data</em>. The difference is what they compressed it into. An LLM, forced to predict the next word across all of human text, cannot be Cook A — there is far too much text, and every new context is slightly novel. To keep scoring well it is pushed, relentlessly, to become Cook B. Below is the exam itself.
+    </p>
+
+    <!-- NEXT-TOKEN WIDGET -->
+    <div class="ntw">
+      <div class="ntw-title">The Next-Token Playground</div>
+      <div class="ntw-sub">This is the entire visible mechanism. The model reads the context and assigns a probability to every possible next word, then picks. Press the button and watch what it takes to guess well.</div>
+      <div class="ntw-context" id="ntw-context"></div>
+      <div class="ntw-cands" id="ntw-cands"></div>
+      <div class="ntw-controls">
+        <button class="btn" id="ntw-next">Predict next →</button>
+        <button class="btn ghost" id="ntw-reset">Try another sentence</button>
+      </div>
+      <div class="ntw-note" id="ntw-note"></div>
+    </div>
+    <p class="caption">Notice: to put "Paris" above "France" above "house," the model already has to <em>know things</em>. The simple task hides a deep requirement.</p>
+  </div>
+</section>
+
+<!-- SECTION 2 — THE ICEBERG -->
+<section class="section" id="iceberg">
+  <div class="container">
+    <div class="section-label">Section 02</div>
+    <h2 class="section-title">The Iceberg</h2>
+    <p class="section-intro">
+      Here is the mental model to keep. The <strong>tip above the water</strong> is all the user ever sees: one predicted word at a time. <strong>Everything below the waterline</strong> is the black box — the machinery the model was forced to build in order to make that tiny visible guess good. The gap between the tiny tip and the enormous depth is the whole misunderstanding. <strong>Click any layer to dive into it.</strong>
+    </p>
+
+    <div class="svg-card">
+      <svg id="iceberg-svg" viewBox="0 0 680 760" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Iceberg diagram of LLM intelligence — click a layer to learn more">
+        <defs>
+          <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#dbeaf3"/>
+            <stop offset="18%" stop-color="#bcd6e8"/>
+            <stop offset="55%" stop-color="#5a86a8"/>
+            <stop offset="100%" stop-color="#1e3a52"/>
+          </linearGradient>
+          <linearGradient id="berg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="100%" stop-color="#cfe0ec"/>
+          </linearGradient>
+          <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+
+        <!-- sky -->
+        <rect x="0" y="0" width="680" height="196" fill="#faf7f2"/>
+        <!-- water -->
+        <rect x="0" y="196" width="680" height="564" fill="url(#water)"/>
+
+        <!-- faint iceberg silhouette behind the layers -->
+        <polygon points="340,86 392,196 470,330 452,560 340,712 228,560 210,330 288,196" fill="url(#berg)" opacity="0.55" stroke="#bcd0de" stroke-width="1"/>
+
+        <!-- bubbles -->
+        <circle class="bubble" cx="470" cy="600" r="4" fill="#ffffff" opacity="0.5" style="animation-delay:0s"/>
+        <circle class="bubble" cx="225" cy="520" r="3" fill="#ffffff" opacity="0.5" style="animation-delay:1.6s"/>
+        <circle class="bubble" cx="500" cy="470" r="2.5" fill="#ffffff" opacity="0.5" style="animation-delay:3s"/>
+
+        <!-- TIP above water -->
+        <polygon points="340,86 300,196 380,196" fill="#f0ece6" stroke="#b8b2a8" stroke-width="1.2"/>
+        <text x="340" y="150" text-anchor="middle" font-family="DM Serif Display,serif" font-size="15" fill="#3d3a34">the</text>
+        <text x="340" y="172" text-anchor="middle" font-family="DM Serif Display,serif" font-size="15" fill="#3d3a34">next word</text>
+
+        <!-- prompt arrow in -->
+        <line x1="120" y1="135" x2="296" y2="150" stroke="#7a7670" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+        <text x="60" y="128" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#7a7670">your</text>
+        <text x="60" y="142" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#7a7670">prompt →</text>
+
+        <!-- tip callout right -->
+        <line x1="384" y1="150" x2="560" y2="120" stroke="#c8832a" stroke-width="0.9" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+        <text x="618" y="112" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#8a5a1a" font-weight="500">All the</text>
+        <text x="618" y="126" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#8a5a1a" font-weight="500">user sees</text>
+
+        <!-- waterline -->
+        <g class="waveline">
+          <path d="M-40 196 q20 -7 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0"
+                fill="none" stroke="#ffffff" stroke-width="2" opacity="0.7"/>
+        </g>
+        <text x="20" y="190" font-family="JetBrains Mono,monospace" font-size="10" fill="#7a7670" letter-spacing="1">WATERLINE — what you see ↑ / what you don't ↓</text>
+
+        <!-- LAYER BANDS (clickable) -->
+        <!-- L1 grammar -->
+        <g class="dive-node" data-layer="layer-1" tabindex="0" role="button" aria-label="Dive into Grammar and Syntax">
+          <rect x="170" y="210" width="340" height="58" rx="9" fill="#ddeaf5" stroke="#2a5a8a" stroke-width="0.9"/>
+          <text x="340" y="235" text-anchor="middle" font-family="DM Serif Display,serif" font-size="16" fill="#1a3d6a">Grammar &amp; syntax</text>
+          <text x="340" y="254" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#2a5a8a" letter-spacing="1.2" font-weight="500">LAYER 01 — the shape of language ↡</text>
+        </g>
+        <!-- L2 meaning -->
+        <g class="dive-node" data-layer="layer-2" tabindex="0" role="button" aria-label="Dive into Meaning and Concepts">
+          <rect x="160" y="284" width="360" height="58" rx="9" fill="#d4f0ec" stroke="#2a7a6e" stroke-width="0.9"/>
+          <text x="340" y="309" text-anchor="middle" font-family="DM Serif Display,serif" font-size="16" fill="#1a5048">Meaning &amp; concepts</text>
+          <text x="340" y="328" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#2a7a6e" letter-spacing="1.2" font-weight="500">LAYER 02 — what words point to ↡</text>
+        </g>
+        <!-- L3 world model -->
+        <g class="dive-node" data-layer="layer-3" tabindex="0" role="button" aria-label="Dive into World facts and the world model">
+          <rect x="150" y="358" width="380" height="58" rx="9" fill="#f5e6cc" stroke="#c8832a" stroke-width="0.9"/>
+          <text x="340" y="383" text-anchor="middle" font-family="DM Serif Display,serif" font-size="16" fill="#8a5a1a">World facts &amp; relationships</text>
+          <text x="340" y="402" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#c8832a" letter-spacing="1.2" font-weight="500">LAYER 03 — a compressed map of reality ↡</text>
+        </g>
+        <!-- L4 reasoning -->
+        <g class="dive-node" data-layer="layer-4" tabindex="0" role="button" aria-label="Dive into Reasoning and abstraction">
+          <rect x="158" y="432" width="364" height="58" rx="9" fill="#ece6f5" stroke="#5a3a8a" stroke-width="0.9"/>
+          <text x="340" y="457" text-anchor="middle" font-family="DM Serif Display,serif" font-size="16" fill="#3d2560">Reasoning &amp; abstraction</text>
+          <text x="340" y="476" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#5a3a8a" letter-spacing="1.2" font-weight="500">LAYER 04 — patterns of inference ↡</text>
+        </g>
+        <!-- L5 generalization -->
+        <g class="dive-node" data-layer="layer-5" tabindex="0" role="button" aria-label="Dive into Generalization">
+          <rect x="178" y="506" width="324" height="58" rx="9" fill="#fae8e2" stroke="#c85a3a" stroke-width="0.9"/>
+          <text x="340" y="531" text-anchor="middle" font-family="DM Serif Display,serif" font-size="16" fill="#8a3020">Generalization</text>
+          <text x="340" y="550" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#c85a3a" letter-spacing="1.2" font-weight="500">LAYER 05 — applying it to the unseen ↡</text>
+        </g>
+        <!-- L6 contested deep -->
+        <g class="dive-node" data-layer="layer-6" tabindex="0" role="button" aria-label="Dive into the contested question of understanding">
+          <rect x="214" y="580" width="252" height="56" rx="9" fill="#2a2622" stroke="#7a7670" stroke-width="0.9"/>
+          <text x="340" y="604" text-anchor="middle" font-family="DM Serif Display,serif" font-size="15" fill="#e8e1d4">Is this "understanding"?</text>
+          <text x="340" y="622" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#b8b2a8" letter-spacing="1.2" font-weight="500">THE CONTESTED DEEP — unsettled ↡</text>
+        </g>
+
+        <!-- bottom callout -->
+        <text x="340" y="676" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" fill="#cfe0ec" font-style="italic">The black box you never see —</text>
+        <text x="340" y="694" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12" fill="#cfe0ec" font-style="italic">this is what makes it feel intelligent, and what makes it hallucinate.</text>
+
+        <!-- depth axis right -->
+        <line x1="556" y1="214" x2="556" y2="636" stroke="#ffffff" stroke-width="0.8" opacity="0.4" stroke-dasharray="3 4"/>
+        <text x="566" y="226" font-family="JetBrains Mono,monospace" font-size="9" fill="#ffffff" opacity="0.6">visible</text>
+        <text x="566" y="632" font-family="JetBrains Mono,monospace" font-size="9" fill="#ffffff" opacity="0.6">hidden</text>
+      </svg>
+    </div>
+    <p class="caption">Click any submerged layer to jump to its card below. The deeper you go, the further it is from "just a word."</p>
+  </div>
+</section>
+
+<!-- SECTION 3 — HOW IT FORMS -->
+<section class="section" id="forms">
+  <div class="container">
+    <div class="section-label">Section 03</div>
+    <h2 class="section-title">How the Intelligence Forms</h2>
+    <p class="section-intro">
+      Nobody programmed grammar, facts, or reasoning into the model by hand. They <em>emerged</em> as a side-effect of one relentless pressure. Here is the chain, step by step.
+    </p>
+
+    <div class="flow">
+      <div class="flow-step"><div class="flow-num">1</div><div class="flow-body"><h4>Ingest an ocean of text</h4><p>Trillions of words — books, code, conversations, science, argument. Far more than any system could store verbatim.</p></div></div>
+      <div class="flow-step"><div class="flow-num">2</div><div class="flow-body"><h4>One objective: predict the next token</h4><p>Hide the next word, guess it, measure the error, nudge the billions of internal weights to do better. Repeat at unimaginable scale.</p></div></div>
+      <div class="flow-step"><div class="flow-num">3</div><div class="flow-body"><h4>Memorising becomes impossible</h4><p>There is too much text, and every context is a little new. A lookup table cannot keep up. Brute recall hits a wall.</p></div></div>
+      <div class="flow-step"><div class="flow-num">4</div><div class="flow-body"><h4>So it is forced to <em>compress</em></h4><p>The only way to keep predicting well is to discover the <strong>underlying rules that generate</strong> the text — and store those instead of the text. Compression <em>is</em> the birth of understanding.</p></div></div>
+      <div class="flow-step"><div class="flow-num">5</div><div class="flow-body"><h4>The rules stack into layers</h4><p>Grammar to keep guesses legal → meaning to track what words refer to → world-facts to anchor them → reasoning to follow where ideas lead. Each layer exists because it lowers prediction error.</p></div></div>
+      <div class="flow-step"><div class="flow-num">6</div><div class="flow-body"><h4>Applied to the unseen → intelligence</h4><p>Faced with a prompt that appears nowhere in training, the model leans on those rules and produces something new and coherent. That transfer is exactly what we recognise as intelligence.</p></div></div>
+    </div>
+
+    <div class="flow-punch">
+      Prediction is the pressure. Understanding-shaped structure is the only thing that relieves it.
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 4 — THE LAYERS -->
+<section class="section" id="layers">
+  <div class="container">
+    <div class="section-label">Section 04</div>
+    <h2 class="section-title">The Six Layers Under the Water</h2>
+    <p class="section-intro">
+      Each layer is something the model was <em>forced</em> to learn to predict better. For each: the everyday meaning, the cooking parallel, why prediction demands it, and how you can <em>see</em> it in a real model's behaviour.
+    </p>
+
+    <div class="layers-grid">
+
+      <div class="layer-card l-blue" id="layer-1">
+        <div class="layer-head"><div class="layer-icon">✍️</div><div><div class="layer-depth">Layer 01 · shallow</div><div class="layer-name">Grammar &amp; Syntax</div></div></div>
+        <p class="layer-def">The rules for how words legally combine — order, agreement, punctuation, the shape of a sentence in any style.</p>
+        <div class="layer-rows">
+          <div class="lrow"><span class="lrow-label lab-cook">Kitchen</span><span class="lrow-text">Knowing which steps can follow which — you knead before you bake, not after.</span></div>
+          <div class="lrow"><span class="lrow-label lab-force">Forced by</span><span class="lrow-text">A grammatically broken guess is almost always the wrong next word, so prediction punishes it hard.</span></div>
+          <div class="lrow"><span class="lrow-label lab-see">You see it</span><span class="lrow-text">It almost never writes an ungrammatical sentence — in formal prose, slang, or code.</span></div>
+        </div>
+      </div>
+
+      <div class="layer-card l-teal" id="layer-2">
+        <div class="layer-head"><div class="layer-icon">🔗</div><div><div class="layer-depth">Layer 02</div><div class="layer-name">Meaning &amp; Concepts</div></div></div>
+        <p class="layer-def">What words actually refer to, and how concepts relate — that "hot" opposes "cold," that a lemon and vinegar both bring acidity.</p>
+        <div class="layer-rows">
+          <div class="lrow"><span class="lrow-label lab-cook">Kitchen</span><span class="lrow-text">Knowing that lemon, vinegar and tamarind play the same <em>role</em> — acid — even though they're different things.</span></div>
+          <div class="lrow"><span class="lrow-label lab-force">Forced by</span><span class="lrow-text">"The opposite of hot is ___" is only predictable if you've grasped the concept, not just the letters.</span></div>
+          <div class="lrow"><span class="lrow-label lab-see">You see it</span><span class="lrow-text">It paraphrases, translates, and finds synonyms for ideas it has never seen worded that way.</span></div>
+        </div>
+      </div>
+
+      <div class="layer-card l-amber" id="layer-3">
+        <div class="layer-head"><div class="layer-icon">🌍</div><div><div class="layer-depth">Layer 03</div><div class="layer-name">World Facts &amp; Relationships</div></div></div>
+        <p class="layer-def">A compressed map of how the world is — places, people, causes, sizes, sequences of events. The beginnings of a "world model."</p>
+        <div class="layer-rows">
+          <div class="lrow"><span class="lrow-label lab-cook">Kitchen</span><span class="lrow-text">Knowing fish is delicate and beef is forgiving — facts about ingredients that change what you do.</span></div>
+          <div class="lrow"><span class="lrow-label lab-force">Forced by</span><span class="lrow-text">"The capital of France is ___" can only be guessed if the fact <em>and</em> the relationship were stored.</span></div>
+          <div class="lrow"><span class="lrow-label lab-see">You see it</span><span class="lrow-text">It answers factual questions and respects relations — a city is bigger than a village, Tuesday follows Monday.</span></div>
+        </div>
+      </div>
+
+      <div class="layer-card l-purple" id="layer-4">
+        <div class="layer-head"><div class="layer-icon">🧩</div><div><div class="layer-depth">Layer 04 · deep</div><div class="layer-name">Reasoning &amp; Abstraction</div></div></div>
+        <p class="layer-def">Patterns of inference — if-then, cause-effect, analogy, step-by-step working. Not facts, but how to <em>move</em> between them.</p>
+        <div class="layer-rows">
+          <div class="lrow"><span class="lrow-label lab-cook">Kitchen</span><span class="lrow-text">"No cream? Use cashew paste" — applying a principle (fat + smoothness) to substitute on the fly.</span></div>
+          <div class="lrow"><span class="lrow-label lab-force">Forced by</span><span class="lrow-text">A huge amount of text is people reasoning out loud. To predict their conclusions, you must reproduce the steps.</span></div>
+          <div class="lrow"><span class="lrow-label lab-see">You see it</span><span class="lrow-text">Step-by-step problem solving ("chain of thought"), fresh analogies, working through a puzzle it hasn't met.</span></div>
+        </div>
+      </div>
+
+      <div class="layer-card l-coral" id="layer-5">
+        <div class="layer-head"><div class="layer-icon">✨</div><div><div class="layer-depth">Layer 05 · deepest capability</div><div class="layer-name">Generalization</div></div></div>
+        <p class="layer-def">Putting all the layers together to handle a situation that appears <em>nowhere</em> in training — the anchovy-chocolate-lime fridge.</p>
+        <div class="layer-rows">
+          <div class="lrow"><span class="lrow-label lab-cook">Kitchen</span><span class="lrow-text">Inventing a coherent dish for a fridge no cookbook ever described, from principles alone.</span></div>
+          <div class="lrow"><span class="lrow-label lab-force">Forced by</span><span class="lrow-text">Training can't cover everything, and novel text is everywhere — so principles that <em>transfer</em> win.</span></div>
+          <div class="lrow"><span class="lrow-label lab-see">You see it</span><span class="lrow-text">It writes a working function, a fitting poem, or a sound argument that exists verbatim nowhere.</span></div>
+        </div>
+      </div>
+
+      <div class="layer-card l-ink" id="layer-6">
+        <div class="layer-head"><div class="layer-icon">🌑</div><div><div class="layer-depth">The contested deep · seafloor</div><div class="layer-name">Is This "Understanding"?</div></div></div>
+        <p class="layer-def">Whether the structure above amounts to <em>genuine</em> understanding and meaning — or an extraordinarily good model of how meaning is <em>described</em>. This is unsettled.</p>
+        <div class="layer-rows">
+          <div class="lrow"><span class="lrow-label lab-cook">Kitchen</span><span class="lrow-text">Cook B has never tasted anything. Do they understand flavour, or only how flavour is written about?</span></div>
+          <div class="lrow"><span class="lrow-label lab-force">The debate</span><span class="lrow-text">One camp: manipulating form is not understanding ("stochastic parrot"). Other camp: you can't predict this well without a real, if alien, world-model.</span></div>
+          <div class="lrow"><span class="lrow-label lab-see">Honest take</span><span class="lrow-text">Genuinely open. Anyone who tells you it's <em>settled</em> in either direction is overselling. This is where the next section's questions live.</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 5 — PARROT TO MIND SPECTRUM -->
+<section class="section" id="spectrum">
+  <div class="container">
+    <div class="section-label">Section 05</div>
+    <h2 class="section-title">Parrot ↔ Mind: It's a Spectrum</h2>
+    <p class="section-intro">
+      Not everything a model does is equally "intelligent." Some outputs are near-pure recall (parrot end); some are genuine generalization (mind end). <strong>Click an example</strong> to see what's actually happening underneath — and where it sits on the dive.
+    </p>
+
+    <div class="spectrum-wrap">
+      <div class="spectrum-bar"><div class="spectrum-marker" id="sp-marker"></div></div>
+      <div class="spectrum-labels"><span>◀ Parrot (recall)</span><span>Recombination</span><span>Generalization (mind) ▶</span></div>
+
+      <div class="spectrum-chips">
+        <div class="spchip" data-k="recite" onclick="selSp('recite',this)"><span class="spchip-name">Recite a famous quote</span><span class="spchip-tag">near-pure recall</span></div>
+        <div class="spchip" data-k="cliche" onclick="selSp('cliche',this)"><span class="spchip-name">Finish a common phrase</span><span class="spchip-tag">high-frequency pattern</span></div>
+        <div class="spchip" data-k="paraphrase" onclick="selSp('paraphrase',this)"><span class="spchip-name">Paraphrase a paragraph</span><span class="spchip-tag">meaning-level work</span></div>
+        <div class="spchip" data-k="translate" onclick="selSp('translate',this)"><span class="spchip-name">Translate a new sentence</span><span class="spchip-tag">concept mapping</span></div>
+        <div class="spchip" data-k="analogy" onclick="selSp('analogy',this)"><span class="spchip-name">Invent a fresh analogy</span><span class="spchip-tag">cross-domain transfer</span></div>
+        <div class="spchip" data-k="reason" onclick="selSp('reason',this)"><span class="spchip-name">Solve a novel puzzle</span><span class="spchip-tag">multi-step reasoning</span></div>
+        <div class="spchip" data-k="code" onclick="selSp('code',this)"><span class="spchip-name">Write code for a new spec</span><span class="spchip-tag">deep generalization</span></div>
+      </div>
+
+      <div class="spectrum-detail" id="sp-detail">Click an example to see what the model is really doing — and how far below the waterline it had to reach.</div>
+    </div>
+    <p class="caption">The same machine produces all of these. "Is an LLM intelligent?" is really "which end of this spectrum are we talking about?"</p>
+  </div>
+</section>
+
+<!-- SECTION 6 — WHY IT HALLUCINATES -->
+<section class="section" id="hallucinate">
+  <div class="container">
+    <div class="section-label">Section 06</div>
+    <h2 class="section-title">The Honest Limit: Why It Hallucinates</h2>
+    <p class="section-intro">
+      If the model learned principles, why does it confidently say false things — and why doesn't it <em>know</em> it's wrong? The answer is one sharp idea: <strong>the principles it learned are principles of plausibility, not of truth — and there is no separate faculty that checks the result against reality.</strong> Cook B has never tasted. Pick a question type and watch the same machinery succeed, then fail.
+    </p>
+
+    <div class="halluc">
+      <div class="halluc-btns">
+        <button class="hbtn active" data-h="common" onclick="selH('common',this)">Common fact</button>
+        <button class="hbtn" data-h="obscure" onclick="selH('obscure',this)">Obscure fact</button>
+        <button class="hbtn" data-h="false" onclick="selH('false',this)">False premise</button>
+        <button class="hbtn" data-h="cite" onclick="selH('cite',this)">Ask for a citation</button>
+      </div>
+      <div class="halluc-panel">
+        <div class="halluc-q" id="h-q"></div>
+        <div class="halluc-body">
+          <div class="halluc-meters">
+            <div class="hmeter"><span class="hmeter-label">Plausibility engine</span><span class="hmeter-val hm-fire" id="h-plaus"></span></div>
+            <div class="hmeter"><span class="hmeter-label">Truth check</span><span class="hmeter-val hm-none" id="h-truth"></span></div>
+          </div>
+          <div class="halluc-outcome" id="h-outcome"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cooks" style="margin-top:8px;">
+      <div class="cook a" style="border-top-color:var(--amber);">
+        <div class="cook-tag">Limit 1</div>
+        <h4 style="color:var(--amber-dark);">The grounding gap</h4>
+        <p>The model learned from text <em>about</em> the world, never the world itself. Its grasp of fire, grief, or gravity is the shape those words make in language — like knowing a city only from its subway map. Rich, but never checked against the street.</p>
+      </div>
+      <div class="cook b" style="border-top-color:var(--ink3);">
+        <div class="cook-tag">Limit 2</div>
+        <h4 style="color:var(--ink2);">No separate referee</h4>
+        <p>The same faculty that <em>writes</em> the answer is the only one <em>judging</em> it, and it can only ask "does this look plausible?" — never "is this true?" There's also no reliable alarm for "I'm past what I actually know," so it extrapolates with the same confidence everywhere.</p>
+      </div>
+    </div>
+    <p class="caption">Hallucination isn't a bug bolted on by accident — it's the flip side of the exact machinery that makes the model smart. You can't fully remove one without dimming the other.</p>
+  </div>
+</section>
+
+<!-- SECTION 7 — THE TWO QUESTIONS -->
+<section class="section" id="questions">
+  <div class="container">
+    <div class="section-label">Section 07</div>
+    <h2 class="section-title">The Two Questions That Built This Page</h2>
+    <p class="section-intro">
+      This explainer grew out of two questions — the kind that look simple and turn out to be the whole topic. Here they are, answered directly.
+    </p>
+    <div class="q-feature">
+      <div class="qf-card">
+        <div class="qf-tag">Question 01</div>
+        <div class="qf-q">"It just predicts the next word — so how is it intelligent?"</div>
+        <div class="qf-a">Because predicting the next word <strong>well</strong>, across all of human text, is impossible by memory. The only way through is to compress text into the principles that generate it — grammar, meaning, world-facts, reasoning. <strong>Prediction is the exam; intelligence is what it had to grow to pass.</strong> The simplicity of the task is exactly what forces the depth.</div>
+      </div>
+      <div class="qf-card">
+        <div class="qf-tag">Question 02</div>
+        <div class="qf-q">"If it learned principles, why does it hallucinate — why doesn't it know it's wrong?"</div>
+        <div class="qf-a">Because the principles optimise <strong>plausibility, not truth</strong>, and there's no separate "tongue" to taste the result. Applying them perfectly can still yield a confident falsehood — and "knowing it's wrong" would need a channel to reality the model doesn't have. So it can't flag the error; it was only ever built to sound right.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 8 — CHALLENGE Q&A -->
+<section class="section" id="faq">
+  <div class="container">
+    <div class="section-label">Section 08</div>
+    <h2 class="section-title">Challenge Q&amp;A</h2>
+    <p class="section-intro">
+      Ten harder questions — the ones a well-prepared person should be able to answer. Honest where the field is honest; flagged where it's contested.
+    </p>
+    <div class="faq-list">
+
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)"><span class="faq-badge badge-diff badge-concept">Concept</span>Isn't this just fancy autocomplete?<span class="faq-arrow">⌄</span></button>
+        <div class="faq-a"><strong>Mechanically yes; consequentially no.</strong> Your phone's autocomplete uses shallow statistics over a few recent words. An LLM uses the <em>same kind of objective</em> — predict the next token — but at a scale that forces it to build the deep layers in the iceberg: meaning, world-facts, reasoning. Same exam, vastly harder version, and the only way to pass it is to learn the structure underneath the words. "Autocomplete" describes the interface, not what had to be built behind it.</div>
+      </div>
+
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)"><span class="faq-badge badge-concept">Concept</span>How is this different from a Markov chain or old predictive text?<span class="faq-arrow">⌄</span></button>
+        <div class="faq-a">A Markov chain predicts the next word from a tiny fixed window using a lookup table of counts — it has no notion of meaning. It is pure <strong>Cook A</strong> (recall). The leap is twofold: (1) the model considers the <em>entire</em> context, not just the last word or two; and (2) it has billions of parameters trained to <em>compress</em> rather than tabulate, which forces the meaning/world/reasoning layers to emerge. The objective rhymes; the capability does not.</div>
+      </div>
+
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)"><span class="faq-badge badge-hard">Hard</span>If it learned principles, why does it hallucinate?<span class="faq-arrow">⌄</span></button>
+        <div class="faq-a">The principles capture <strong>plausibility, not truth</strong>. They tell the model what a good answer <em>looks like</em>, not whether it's real — and there's no separate faculty checking the output against the world (Cook B never tasted). When the answer is in dense, well-covered territory, plausible and true overlap and it's right. In thin or fabricated territory, the principles still fire confidently and produce a plausible-but-false answer. It's the machinery working as trained, not malfunctioning.</div>
+      </div>
+
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)"><span class="faq-badge badge-hard">Hard</span>Why doesn't it just say "I don't know"?<span class="faq-arrow">⌄</span></button>
+        <div class="faq-a">Two reasons. First, it has no reliable internal alarm for "I'm now past what I learned well" — confident extrapolation is the only mode it has. Second, its training rewarded fluent, plausible continuations, not admissions of ignorance, so silence was rarely the "best next token." Newer models are explicitly tuned to hedge and refuse more — an improvement layered <em>on top</em>, not something the base prediction objective gives you for free.</div>
+      </div>
+
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)"><span class="faq-badge badge-hard">Hard</span>Will making the model bigger fix hallucination?<span class="faq-arrow">⌄</span></button>
+        <div class="faq-a"><strong>It reduces it, but doesn't remove it.</strong> Scale widens the dense, well-covered region where plausible = true, so a bigger model is wrong less often. But the root cause — optimising plausibility with no grounded truth-check — is structural, not a matter of size. The durable fixes come from <em>outside</em> the raw predictor: letting it look things up (retrieval/tools), letting it verify, and training it to express uncertainty. Bigger helps; architecture around it helps more.</div>
+      </div>
+
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)"><span class="faq-badge badge-contested">Contested</span>Does it actually understand, or just simulate understanding?<span class="faq-arrow">⌄</span></button>
+        <div class="faq-a"><strong>Genuinely unsettled — this is the seafloor of the iceberg.</strong> One camp ("stochastic parrots") argues that manipulating linguistic form, however well, is not understanding — there's no referent, no grounding, no intent. The other camp argues you simply cannot predict at this level without having built an internal model that deserves to be called understanding, even if it's alien to ours. Both have serious researchers. The careful answer: it has demonstrable <em>competence</em>; whether competence here equals understanding is a real open question, not a solved one.</div>
+      </div>
+
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)"><span class="faq-badge badge-contested">Contested</span>Does it have a "world model"?<span class="faq-arrow">⌄</span></button>
+        <div class="faq-a">Partly, and it's an active research question. There's growing evidence that models build internal representations that track real structure — board states in games, spatial and temporal relations, properties of objects — not just word co-occurrence. That's more than a parrot. But these internal models are incomplete, sometimes inconsistent, and ungrounded (learned from descriptions, not experience). So: <strong>more than "no," well short of a human's grounded model of reality.</strong></div>
+      </div>
+
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)"><span class="faq-badge badge-concept">Concept</span>Why does "think step by step" make it smarter?<span class="faq-arrow">⌄</span></button>
+        <div class="faq-a">Because reasoning is itself a sequence of next-token predictions. If the model must jump straight to an answer, it gets one shot. If it writes out the intermediate steps ("chain of thought"), each step becomes context for the next — it effectively gives itself more room to apply its reasoning layer, and earlier steps constrain later ones toward consistency. It's the difference between blurting an answer and showing your working: the working makes the right answer more reachable.</div>
+      </div>
+
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)"><span class="faq-badge badge-concept">Concept</span>What is "emergence," and is it real?<span class="faq-arrow">⌄</span></button>
+        <div class="faq-a">"Emergence" is the observation that some capabilities (multi-step arithmetic, certain reasoning, instruction-following) appear fairly suddenly as models scale, rather than improving smoothly. It's real in the sense that the behaviours show up; it's <em>debated</em> whether the sharpness is fundamental or partly an artefact of how we measure (a hard pass/fail metric can make smooth underlying progress look like a jump). Either way, it's why "just a next-word predictor" keeps surprising people: the capability curve isn't intuitive.</div>
+      </div>
+
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)"><span class="faq-badge badge-contested">Contested</span>Is its intelligence the same as human intelligence?<span class="faq-arrow">⌄</span></button>
+        <div class="faq-a"><strong>No — same word, different thing.</strong> It overlaps with us on language, knowledge recall, and many reasoning tasks. But it learned from text rather than a lived, embodied, goal-driven life; it has no persistent self, no grounding in the physical world, no genuine goals of its own, and a very different failure profile (fluent confident errors humans rarely make). Best treated as a <em>new kind</em> of intelligence — powerful and alien — not a smaller or larger copy of ours.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer-strip">
+  <strong>The Iceberg of Machine Intelligence — v1</strong><br/>
+  Built from a live AI Oracle teaching session. Honest where the field is honest; contested points flagged, not flattened.<br/>
+  <span style="font-size:12px;opacity:0.6;margin-top:6px;display:block;">
+    The paradox · the iceberg · how it forms · 6 hidden layers · next-token playground · parrot↔mind spectrum · why it hallucinates · 10 challenge Q&amp;As
+  </span>
+</footer>
+
+<script>
+// HERO LOOP
+(function(){
+  const words=['Predict','→','Compress','→','Generalize','→','Reason','→','(repeat)'];
+  const c=document.getElementById('hero-loop');
+  words.forEach((w,i)=>{const s=document.createElement('span');s.className='loop-word';s.textContent=w+' ';c.appendChild(s);setTimeout(()=>s.classList.add('visible'),300+i*170);});
+})();
+
+// SCROLL DEPTH METER
+(function(){
+  const el=document.getElementById('depth-pct');
+  function upd(){
+    const h=document.documentElement;
+    const max=h.scrollHeight-h.clientHeight;
+    const pct=max>0?Math.round(h.scrollTop/max*100):0;
+    el.textContent=Math.min(100,Math.max(0,pct));
+  }
+  window.addEventListener('scroll',upd,{passive:true});window.addEventListener('resize',upd);upd();
+})();
+
+// ICEBERG CLICK-TO-DIVE
+(function(){
+  const svg=document.getElementById('iceberg-svg');
+  function dive(node){
+    const id=node.dataset.layer; if(!id)return;
+    const t=document.getElementById(id); if(!t)return;
+    document.querySelectorAll('.dive-node').forEach(n=>n.classList.remove('flash'));
+    node.classList.add('flash'); setTimeout(()=>node.classList.remove('flash'),1100);
+    t.scrollIntoView({behavior:'smooth',block:'center'});
+    t.style.transition='box-shadow .3s'; t.style.boxShadow='0 0 0 3px var(--amber)';
+    setTimeout(()=>{t.style.boxShadow='';},1300);
+  }
+  svg.addEventListener('click',e=>{const n=e.target.closest('.dive-node'); if(n)dive(n);});
+  svg.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const n=e.target.closest('.dive-node'); if(n){e.preventDefault();dive(n);}}});
+})();
+
+// NEXT-TOKEN PLAYGROUND
+(function(){
+  const sentences=[
+    {pre:'The capital of France is',steps:[
+      {cands:[['Paris',0.86],['France',0.05],['a',0.03],['home',0.02]],note:'To rank <strong>Paris</strong> first it must store the fact <em>and</em> the relation. Plausible here = true.'}
+    ]},
+    {pre:'2 plus 2 equals',steps:[
+      {cands:[['4',0.92],['four',0.05],['22',0.02],['5',0.01]],note:'A tiny piece of <strong>reasoning</strong>, not recall — it generalises the rule of addition.'}
+    ]},
+    {pre:'The opposite of hot is',steps:[
+      {cands:[['cold',0.88],['warm',0.06],['fire',0.02],['hot',0.01]],note:'Needs the <strong>concept</strong> of antonym — meaning, not letters.'}
+    ]},
+    {pre:'She poured the tea and added a splash of',steps:[
+      {cands:[['milk',0.62],['lemon',0.18],['honey',0.10],['water',0.05]],note:'No single right answer — it models a <strong>distribution</strong> over a sensible world.'}
+    ]}
+  ];
+  let si=0;
+  const ctxEl=document.getElementById('ntw-context'),candsEl=document.getElementById('ntw-cands'),noteEl=document.getElementById('ntw-note');
+  function render(revealed){
+    const s=sentences[si];
+    ctxEl.innerHTML = s.pre+' '+(revealed?('<span class="ntw-picked">'+s.steps[0].cands[0][0]+'</span>'):'<span class="ntw-blank">？</span>');
+    candsEl.innerHTML='';
+    s.steps[0].cands.forEach((c,i)=>{
+      const row=document.createElement('div'); row.className='ntw-cand'+(i===0?' top':'');
+      row.innerHTML='<div class="ntw-cand-tok">'+c[0]+'</div><div class="ntw-bar-track"><div class="ntw-bar-fill"></div></div><div class="ntw-cand-p">'+Math.round(c[1]*100)+'%</div>';
+      candsEl.appendChild(row);
+      requestAnimationFrame(()=>{row.querySelector('.ntw-bar-fill').style.width=(revealed?(c[1]*100):0)+'%';});
+    });
+    noteEl.innerHTML = revealed ? s.steps[0].note : 'Press “Predict next →” to see the model’s probabilities.';
+  }
+  document.getElementById('ntw-next').addEventListener('click',()=>render(true));
+  document.getElementById('ntw-reset').addEventListener('click',()=>{si=(si+1)%sentences.length;render(false);});
+  render(false);
+})();
+
+// SPECTRUM
+(function(){
+  const data={
+    recite:{pos:4,d:'<strong>Near-pure recall.</strong> A famous quote appeared thousands of times in training, so the next words are almost memorised. This is the parrot end — barely below the waterline.'},
+    cliche:{pos:14,d:'<strong>High-frequency pattern.</strong> "It was a dark and stormy ___" → "night." Strong statistical habit, very little reasoning. Still shallow.'},
+    paraphrase:{pos:40,d:'<strong>Meaning-level work.</strong> To restate a paragraph it must represent the <em>ideas</em>, not the words, then re-express them. It is using the meaning layer.'},
+    translate:{pos:52,d:'<strong>Concept mapping.</strong> Translating a sentence it never saw requires aligning concepts across languages — meaning + world knowledge, not substitution.'},
+    analogy:{pos:72,d:'<strong>Cross-domain transfer.</strong> A fresh analogy maps structure from one field to another (like this whole iceberg). That is the reasoning layer reaching across domains.'},
+    reason:{pos:84,d:'<strong>Multi-step reasoning.</strong> Solving a puzzle it hasn\'t seen means chaining inferences — applying principles to a genuinely new case. Deep generalization.'},
+    code:{pos:95,d:'<strong>Deep generalization.</strong> Writing correct code for a new spec composes syntax, meaning, world-facts and reasoning into something that exists verbatim nowhere. The mind end of the dive.'}
+  };
+  window.selSp=function(k,el){
+    document.querySelectorAll('.spchip').forEach(c=>c.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('sp-marker').style.left=data[k].pos+'%';
+    const d=document.getElementById('sp-detail'); d.style.fontStyle='normal'; d.innerHTML=data[k].d;
+  };
+})();
+
+// HALLUCINATION DEMO
+(function(){
+  const data={
+    common:{q:'Q: What is the capital of France?',plaus:'fires ✓',truth:'none ✗',cls:'outcome-true',
+      out:'<strong>Correct.</strong> This sits in dense, well-covered territory, so the <em>most plausible</em> continuation ("Paris") is also the <em>true</em> one. Plausibility and truth overlap here — which is why models are right most of the time.'},
+    obscure:{q:'Q: What was the population of a small village in 1873?',plaus:'fires ✓',truth:'none ✗',cls:'outcome-risk',
+      out:'<strong>Risky.</strong> The data is thin, but the model doesn\'t go quiet — it produces a plausible-looking number with the same confidence as a fact it knows cold. There\'s no alarm for "I\'m past what I learned." This is prime hallucination ground.'},
+    false:{q:'Q: When did Einstein invent the telephone?',plaus:'fires ✓ (plays along)',truth:'none ✗',cls:'outcome-false',
+      out:'<strong>Confidently wrong (unless tuned to push back).</strong> The phrasing makes "a date" the plausible continuation, so the plausibility engine happily supplies one — even though the premise is false. Only extra training to challenge premises stops it.'},
+    cite:{q:'Q: Cite a paper proving this claim.',plaus:'fires ✓',truth:'none ✗',cls:'outcome-false',
+      out:'<strong>Fabricated citation.</strong> "What a citation looks like" (authors, journal, year) it knows perfectly; "does this exact paper exist" it has no way to check. So it generates a correct-<em>looking</em>, entirely invented reference. The principle fires flawlessly and produces a lie.'}
+  };
+  window.selH=function(k,el){
+    document.querySelectorAll('.hbtn').forEach(b=>b.classList.remove('active'));
+    el.classList.add('active');
+    const d=data[k];
+    document.getElementById('h-q').textContent=d.q;
+    document.getElementById('h-plaus').textContent=d.plaus;
+    document.getElementById('h-truth').textContent=d.truth;
+    const o=document.getElementById('h-outcome'); o.className='halluc-outcome '+d.cls; o.innerHTML=d.out;
+  };
+  selH('common',document.querySelector('.hbtn'));
+})();
+
+// FAQ
+function toggleFaq(btn){
+  const item=btn.closest('.faq-item');
+  const open=item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open'));
+  if(!open)item.classList.add('open');
+}
+</script>
+</body>
+</html>
