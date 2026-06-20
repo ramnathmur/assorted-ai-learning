@@ -4,181 +4,251 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Assorted AI Learning</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #07090f;
-      --surface: #0f1221;
-      --surface-2: #161c30;
-      --border: #1e2640;
-      --accent: #00e5ff;
-      --accent-purple: #c084fc;
-      --accent-green: #34d399;
-      --text: #e2e8f0;
-      --text-muted: #8892a4;
-      --text-dim: #5a6375;
+      --bg: #f9f7f3;
+      --surface: #ffffff;
+      --surface-hover: #f7f5f1;
+      --border: #e8e5e0;
+      --border-strong: #e2dfd9;
+      --text-primary: #1a1a24;
+      --text-secondary: #636275;
+      --text-muted: #838394;
+      --text-faint: #a3a3b0;
+      --nav-text: #717190;
+      --tag-concept-text: #8a6f30;
+      --tag-concept-bg: #f5eedc;
+      --tag-deepdive-text: #2c5f9e;
+      --tag-deepdive-bg: #ddeaf8;
+      --tag-reference-text: #2a7051;
+      --tag-reference-bg: #d8f0e5;
     }
 
     body {
       background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      color: var(--text-primary);
+      font-family: 'DM Sans', system-ui, sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     /* ── Header ── */
     header {
-      border-bottom: 1px solid var(--border);
-      padding: 20px 32px;
+      border-bottom: 1px solid var(--border-strong);
+      background: var(--bg);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 32px;
+      height: 52px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
-    .brand {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .brand-name {
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text);
-      text-decoration: none;
-    }
-
-    .brand-name span { color: var(--accent); }
-
-    .brand-sub {
+    .wordmark {
       font-size: 11px;
-      color: var(--text-dim);
-      letter-spacing: 0.08em;
+      font-weight: 500;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
+      color: var(--nav-text);
     }
 
     .hub-link {
-      font-size: 12px;
-      color: var(--text-muted);
+      font-size: 13px;
+      color: var(--nav-text);
       text-decoration: none;
-      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       transition: color 0.15s;
     }
 
-    .hub-link:hover { color: var(--accent); }
+    .hub-link:hover { color: var(--text-primary); }
 
     /* ── Hero ── */
     .hero {
-      padding: 56px 32px 40px;
-      max-width: 880px;
+      max-width: 860px;
       margin: 0 auto;
+      padding: 72px 32px 56px;
       width: 100%;
     }
 
     .hero h1 {
-      font-size: 32px;
-      font-weight: 700;
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(36px, 5vw, 52px);
+      font-weight: 400;
+      line-height: 1.1;
       letter-spacing: -0.02em;
-      margin-bottom: 12px;
+      color: var(--text-primary);
+      margin-bottom: 16px;
     }
-
-    .hero h1 span { color: var(--accent); }
 
     .hero p {
-      font-size: 16px;
-      color: var(--text-muted);
-      line-height: 1.7;
-      max-width: 600px;
+      font-size: 17px;
+      font-weight: 300;
+      line-height: 1.65;
+      color: var(--text-secondary);
+      max-width: 520px;
     }
 
-    .count-badge {
-      display: inline-block;
-      margin-top: 20px;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
+    /* ── Filter buttons ── */
+    .filters {
+      display: flex;
+      gap: 8px;
+      margin-top: 36px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 6px 14px;
       border-radius: 20px;
-      padding: 4px 14px;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: 'DM Sans', sans-serif;
       font-size: 12px;
-      color: var(--text-muted);
+      font-weight: 500;
       letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-btn.active {
+      background: var(--text-primary);
+      border-color: var(--text-primary);
+      color: var(--bg);
+    }
+
+    .filter-btn:not(.active):hover {
+      border-color: var(--nav-text);
+    }
+
+    /* ── Divider ── */
+    .divider {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 32px;
+      width: 100%;
+    }
+
+    .divider-line {
+      height: 1px;
+      background: var(--border-strong);
     }
 
     /* ── Grid ── */
     main {
-      flex: 1;
-      padding: 0 32px 64px;
-      max-width: 880px;
+      max-width: 860px;
       margin: 0 auto;
+      padding: 48px 32px 80px;
       width: 100%;
+      flex: 1;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 2px;
     }
 
     /* ── Card ── */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 20px;
+      padding: 32px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
       text-decoration: none;
       color: inherit;
-      transition: border-color 0.15s, background 0.15s, transform 0.15s;
+      transition: background 0.15s, border-color 0.15s;
+      animation: fadeUp 0.4s ease both;
     }
 
     .card:hover {
-      border-color: var(--accent);
-      background: var(--surface-2);
-      transform: translateY(-2px);
+      background: var(--surface-hover);
+      border-color: var(--nav-text);
     }
 
-    .card-icon {
-      width: 36px;
-      height: 36px;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+    .card-meta {
       display: flex;
       align-items: center;
-      justify-content: center;
+      gap: 8px;
+      margin-bottom: 18px;
     }
 
-    .card-icon svg {
-      width: 18px;
-      height: 18px;
-      stroke: var(--accent);
+    .type-tag {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 3px;
     }
 
-    .card h3 {
-      font-size: 14px;
-      font-weight: 600;
-      line-height: 1.4;
-      color: var(--text);
+    .type-tag.concept {
+      color: var(--tag-concept-text);
+      background: var(--tag-concept-bg);
+    }
+
+    .type-tag.deep-dive {
+      color: var(--tag-deepdive-text);
+      background: var(--tag-deepdive-bg);
+    }
+
+    .type-tag.reference {
+      color: var(--tag-reference-text);
+      background: var(--tag-reference-bg);
+    }
+
+    .read-time {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .card h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px;
+      font-weight: 400;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      margin-bottom: 10px;
     }
 
     .card p {
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.6;
+      font-size: 14px;
+      font-weight: 300;
+      line-height: 1.65;
+      color: var(--text-secondary);
       flex: 1;
     }
 
-    .card-arrow {
+    .card-link {
+      margin-top: 20px;
       font-size: 13px;
-      color: var(--accent);
       font-weight: 500;
-      margin-top: 4px;
+      color: var(--text-primary);
+      text-decoration: none;
+      border-bottom: 1px solid var(--text-faint);
+      display: inline-block;
     }
 
     /* ── Empty state ── */
@@ -186,105 +256,145 @@
       grid-column: 1 / -1;
       text-align: center;
       padding: 64px 32px;
-      color: var(--text-dim);
+      color: var(--text-muted);
+      font-size: 14px;
     }
-
-    .empty svg {
-      width: 48px;
-      height: 48px;
-      stroke: var(--border);
-      margin-bottom: 16px;
-    }
-
-    .empty p { font-size: 14px; }
 
     /* ── Footer ── */
     footer {
-      border-top: 1px solid var(--border);
-      padding: 20px 32px;
-      text-align: center;
-      font-size: 12px;
-      color: var(--text-dim);
+      border-top: 1px solid var(--border-strong);
+      margin-top: auto;
     }
 
-    footer a { color: var(--text-muted); text-decoration: none; }
-    footer a:hover { color: var(--accent); }
+    .footer-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-left {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .footer-left a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-bottom: 1px solid var(--text-faint);
+    }
+
+    .footer-left a:hover { color: var(--text-primary); }
+
+    .footer-right {
+      font-size: 12px;
+      color: var(--text-faint);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 720px) {
+      .grid { grid-template-columns: 1fr; }
+      .hero { padding: 48px 20px 40px; }
+      .header-inner, main, .divider { padding-left: 20px; padding-right: 20px; }
+      .footer-inner { padding-left: 20px; padding-right: 20px; }
+    }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="brand">
-      <span class="brand-name">ASSORTED <span>AI</span> LEARNING</span>
-      <span class="brand-sub">Standalone materials · No prerequisite chain</span>
+    <div class="header-inner">
+      <span class="wordmark">Assorted AI Learning</span>
+      <a href="https://course-landing-hub.vercel.app" class="hub-link">
+        <span>&larr;</span> Neural Hub
+      </a>
     </div>
-    <a href="https://course-landing-hub.vercel.app" class="hub-link">← Neural Hub</a>
   </header>
 
-  <div class="hero">
-    <h1>AI Learning <span>Collection</span></h1>
+  <section class="hero">
+    <h1>AI Learning Collection</h1>
     <p>Focused, standalone pieces — concept explainers, deep dives, and reference guides. Read in any order.</p>
-    <span class="count-badge" id="count-badge">Loading…</span>
-  </div>
+    <div class="filters" id="filters">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="concept">Concept</button>
+      <button class="filter-btn" data-filter="deep-dive">Deep Dive</button>
+      <button class="filter-btn" data-filter="reference">Reference</button>
+    </div>
+  </section>
+
+  <div class="divider"><div class="divider-line"></div></div>
 
   <main>
-    <div class="grid" id="grid">
-      <!-- cards injected by JS -->
-    </div>
+    <div class="grid" id="grid"></div>
   </main>
 
   <footer>
-    Part of <a href="https://course-landing-hub.vercel.app">Neural Hub</a> &mdash; AI courses for practitioners
+    <div class="footer-inner">
+      <span class="footer-left">Part of <a href="https://course-landing-hub.vercel.app">Neural Hub</a> &mdash; AI courses for practitioners</span>
+      <span class="footer-right">Standalone &middot; No prerequisites</span>
+    </div>
   </footer>
 
   <script>
-    // ── File manifest — add entries here as new files are uploaded ──
     const FILES = [
       {
         href: 'AI-Oracle_LLM-Iceberg-Explainer_v6.html',
         title: 'The Iceberg of Machine Intelligence — A Course on How LLMs Actually Think',
-        desc: 'How predicting one word at a time forces an LLM to learn grammar, meaning, world facts, and reasoning. 10-stop journey with multi-analogy tabs, go-deeper panels, progress sidebar, interactive labs, and challenge Q&A.'
+        desc: 'How predicting one word at a time forces an LLM to learn grammar, meaning, world facts, and reasoning. 10-stop journey with multi-analogy tabs, go-deeper panels, progress sidebar, interactive labs, and challenge Q&A.',
+        type: 'deep-dive',
+        readTime: 45
       },
       {
         href: 'agent_traits_chef_guide_v2.html',
         title: 'What Makes an AI Agent? — The Chef\'s Kitchen Guide',
-        desc: 'The core traits that turn an LLM into an autonomous agent — explained through a chef\'s kitchen. Memory, tools, planning, and multi-agent coordination, with interactive demos.'
+        desc: 'The core traits that turn an LLM into an autonomous agent — explained through a chef\'s kitchen. Memory, tools, planning, and multi-agent coordination, with interactive demos.',
+        type: 'concept',
+        readTime: 20
       },
     ];
 
+    const TYPE_LABELS = {
+      'concept': 'Concept',
+      'deep-dive': 'Deep Dive',
+      'reference': 'Reference'
+    };
+
     const grid = document.getElementById('grid');
-    const badge = document.getElementById('count-badge');
 
-    function fileIcon() {
-      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-        <polyline points="14 2 14 8 20 8"/>
-        <line x1="16" y1="13" x2="8" y2="13"/>
-        <line x1="16" y1="17" x2="8" y2="17"/>
-        <polyline points="10 9 9 9 8 9"/>
-      </svg>`;
-    }
+    function renderCards(filter) {
+      const visible = filter === 'all' ? FILES : FILES.filter(f => f.type === filter);
 
-    if (FILES.length === 0) {
-      grid.innerHTML = `
-        <div class="empty">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-          </svg>
-          <p>Materials loading in shortly — check back soon.</p>
-        </div>`;
-      badge.textContent = '0 pieces';
-    } else {
-      badge.textContent = `${FILES.length} piece${FILES.length === 1 ? '' : 's'}`;
-      grid.innerHTML = FILES.map(f => `
-        <a href="${f.href}" class="card">
-          <div class="card-icon">${fileIcon()}</div>
-          <h3>${f.title}</h3>
+      if (visible.length === 0) {
+        grid.innerHTML = '<div class="empty">No articles match this filter.</div>';
+        return;
+      }
+
+      grid.innerHTML = visible.map((f, i) => `
+        <a href="${f.href}" class="card" style="animation-delay: ${(i + 1) * 0.05}s">
+          <div class="card-meta">
+            <span class="type-tag ${f.type}">${TYPE_LABELS[f.type]}</span>
+            <span class="read-time">${f.readTime} min read</span>
+          </div>
+          <h2>${f.title}</h2>
           <p>${f.desc}</p>
-          <div class="card-arrow">Read →</div>
+          <span class="card-link">Read &rarr;</span>
         </a>`).join('');
     }
+
+    document.getElementById('filters').addEventListener('click', e => {
+      const btn = e.target.closest('.filter-btn');
+      if (!btn) return;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderCards(btn.dataset.filter);
+    });
+
+    renderCards('all');
   </script>
 
 </body>
